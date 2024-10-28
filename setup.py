@@ -22,7 +22,7 @@ setuptools.setup(
         "numpy==1.23.5",
         "imgaug",
         "scikit-image",
-        "epam.indigo",
+        "epam.indigo==1.11.0",
         "jpype1",
         "ipyplot",
         "rdkit",
