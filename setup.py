@@ -19,7 +19,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     license="MIT",
     install_requires=[
-        "numpy>=1.19",
+        "numpy>=1.24,<2.0",
         "imgaug",
         "scikit-image",
         "epam.indigo",
