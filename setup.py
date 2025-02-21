@@ -29,6 +29,7 @@ setuptools.setup(
         "imagecorruptions",
         "pillow>=8.2.0",
         "pikachu-chem>=1.0.7",
+        "matplotlib==3.9.4",
         "omegaconf",
         "pystow",
         "typing-extensions;python_version<'3.8'"
