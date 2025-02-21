@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="RanDepict",
-    version="1.4.0",
+    version="1.4.1",
     author="Otto Brinkhaus",
     author_email="otto.brinkhaus@uni-jena.de, kohulan.rajan@uni-jena.de",
     maintainer="Otto Brinkhaus, Kohulan Rajan",
@@ -30,6 +30,7 @@ setuptools.setup(
         "pillow>=8.2.0",
         "pikachu-chem>=1.0.7",
         "omegaconf",
+        "pystow",
         "typing-extensions;python_version<'3.8'"
     ],
     extras_require={

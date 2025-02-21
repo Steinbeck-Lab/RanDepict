@@ -1,7 +1,0 @@
-rdkit
-numpy
-scikit-image
-epam.indigo
-jpype1
-ipyplot
-pikachu-chem>=1.0.7

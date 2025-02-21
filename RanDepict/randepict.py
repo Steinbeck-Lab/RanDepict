@@ -12,6 +12,7 @@ from pathlib import Path
 from PIL import Image
 import random
 import re
+import pystow
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from skimage import io as sk_io
@@ -27,15 +28,17 @@ from .rdkit_functionalities import RDKitFuntionalities
 
 
 # Below version 9.0, PIL stores resampling methods differently
-if not hasattr(Image, 'Resampling'):
+if not hasattr(Image, "Resampling"):
     Image.Resampling = Image
 
 
-class RandomDepictor(Augmentations,
-                     CDKFunctionalities,
-                     IndigoFunctionalities,
-                     PikachuFunctionalities,
-                     RDKitFuntionalities):
+class RandomDepictor(
+    Augmentations,
+    CDKFunctionalities,
+    IndigoFunctionalities,
+    PikachuFunctionalities,
+    RDKitFuntionalities,
+):
     """
     This class contains everything necessary to generate a variety of
     random depictions with given SMILES strings. An instance of RandomDepictor
@@ -43,7 +46,13 @@ class RandomDepictor(Augmentations,
     the RGB image with the given chemical structure.
     """
 
-    def __init__(self, seed: Optional[int] = None, hand_drawn: Optional[bool] = None, *, config: RandomDepictorConfig = None):
+    def __init__(
+        self,
+        seed: Optional[int] = None,
+        hand_drawn: Optional[bool] = None,
+        *,
+        config: RandomDepictorConfig = None,
+    ):
         """
         Load the JVM only once, load superatom list (OSRA),
         set context for multiprocessing
@@ -90,11 +99,25 @@ class RandomDepictor(Augmentations,
             )
             self.jvmPath = "Define/path/or/set/JAVA_HOME/variable/properly"
         if not isJVMStarted():
-            self.jar_path = self.HERE.joinpath("jar_files/cdk-2.9.jar")
-            startJVM(self.jvmPath,
-                     "-ea",
-                     "-Djava.class.path=" + str(self.jar_path),
-                     "-Xmx4096M")
+            self.jar_path = str(pystow.join("jar_files", "cdk-2.10.jar"))
+
+            # Download CDK jar if not present
+            if not os.path.exists(self.jar_path):
+                pystow.ensure(
+                    "jar_files",
+                    url="https://github.com/cdk/cdk/releases/download/cdk-2.10/cdk-2.10.jar",
+                )
+
+        for key, url in paths.items():
+            if not os.path.exists(jar_paths[key]):
+                pystow.ensure("jar_files", url=url)
+
+            startJVM(
+                self.jvmPath,
+                "-ea",
+                "-Djava.class.path=" + str(self.jar_path),
+                "-Xmx4096M",
+            )
 
         random.seed(self.seed)
 
@@ -125,7 +148,7 @@ class RandomDepictor(Augmentations,
             pass
 
     @classmethod
-    def from_config(cls, config_file: Path) -> 'RandomDepictor':
+    def from_config(cls, config_file: Path) -> "RandomDepictor":
         try:
             # TODO Needs documentation of config_file yaml format...
             """
@@ -136,9 +159,13 @@ class RandomDepictor(Augmentations,
                 styles:
                     - cdk
             """
-            config: RandomDepictorConfig = RandomDepictorConfig.from_config(OmegaConf.load(config_file)[RandomDepictorConfig.__name__])
+            config: RandomDepictorConfig = RandomDepictorConfig.from_config(
+                OmegaConf.load(config_file)[RandomDepictorConfig.__name__]
+            )
         except Exception as e:
-            print(f"Error loading from {config_file}. Make sure it has {cls.__name__} section. {e}")
+            print(
+                f"Error loading from {config_file}. Make sure it has {cls.__name__} section. {e}"
+            )
             print("Using default config.")
             config = RandomDepictorConfig()
         return RandomDepictor(config=config)
@@ -199,7 +226,7 @@ class RandomDepictor(Augmentations,
         # TODO: add this to depiction feature fingerprint
         if self.random_choice([True] + [False] * 5):
             smiles = self._cdk_add_explicite_hydrogen_to_smiles(smiles)
-            self._config.styles = [style for style in orig_styles if style != 'pikachu']
+            self._config.styles = [style for style in orig_styles if style != "pikachu"]
         depiction_functions = self.get_depiction_functions(smiles)
         self._config.styles = orig_styles
         for _ in range(3):
@@ -221,7 +248,9 @@ class RandomDepictor(Augmentations,
 
             # Randomly select background image and use is as it is
             backgroud_selected = self.random_choice(os.listdir(path_bkg))
-            bkg = cv2.imread(os.path.join(os.path.normpath(path_bkg), backgroud_selected))
+            bkg = cv2.imread(
+                os.path.join(os.path.normpath(path_bkg), backgroud_selected)
+            )
             bkg = cv2.resize(bkg, (256, 256))
             # Combine augmented molecule and augmented background
             p = 0.7
@@ -269,19 +298,19 @@ class RandomDepictor(Augmentations,
             Tuple[np.array, str]: structure depiction, cxSMILES
         """
         orig_styles = self._config.styles
-        self._config.styles = [style for style in orig_styles if style != 'pikachu']
+        self._config.styles = [style for style in orig_styles if style != "pikachu"]
         depiction_functions = self.get_depiction_functions(smiles)
         fun = self.random_choice(depiction_functions)
         self._config.styles = orig_styles
         # TODO: add this to depiction feature fingerprint
         if self.random_choice([True] + [False] * 5):
             smiles = self._cdk_add_explicite_hydrogen_to_smiles(smiles)
-        mol_block = self._smiles_to_mol_block(smiles,
-                                              self.random_choice(['rdkit',
-                                                                  'indigo',
-                                                                  'cdk']))
-        cxsmiles = self._cdk_mol_block_to_cxsmiles(mol_block,
-                                                   ignore_explicite_hydrogens=True)
+        mol_block = self._smiles_to_mol_block(
+            smiles, self.random_choice(["rdkit", "indigo", "cdk"])
+        )
+        cxsmiles = self._cdk_mol_block_to_cxsmiles(
+            mol_block, ignore_explicite_hydrogens=True
+        )
         depiction = fun(mol_block=mol_block, shape=shape)
         if augment:
             depiction = self.add_augmentations(depiction)
@@ -302,13 +331,14 @@ class RandomDepictor(Augmentations,
         """
 
         depiction_functions_registry = {
-            'rdkit': self.rdkit_depict,
-            'indigo': self.indigo_depict,
-            'cdk': self.cdk_depict,
-            'pikachu': self.pikachu_depict,
+            "rdkit": self.rdkit_depict,
+            "indigo": self.indigo_depict,
+            "cdk": self.cdk_depict,
+            "pikachu": self.pikachu_depict,
         }
-        depiction_functions = [depiction_functions_registry[k]
-                               for k in self._config.styles]
+        depiction_functions = [
+            depiction_functions_registry[k] for k in self._config.styles
+        ]
 
         # Remove PIKAChU if there is an isotope
         if re.search(r"(\[\d\d\d?[A-Z])|(\[2H\])|(\[3H\])|(D)|(T)", smiles):
@@ -590,6 +620,7 @@ class RandomDepictor(Augmentations,
         # Generate corresponding amount of fingerprints
         dataset_size = len(smiles_list)
         from .depiction_feature_ranges import DepictionFeatureRanges
+
         FR = DepictionFeatureRanges()
         fingerprint_tuples = FR.generate_fingerprints_for_dataset(
             dataset_size,
@@ -655,6 +686,7 @@ class RandomDepictor(Augmentations,
         # Generate corresponding amount of fingerprints
         dataset_size = len(smiles_list)
         from .depiction_feature_ranges import DepictionFeatureRanges
+
         FR = DepictionFeatureRanges()
         fingerprint_tuples = FR.generate_fingerprints_for_dataset(
             dataset_size,
