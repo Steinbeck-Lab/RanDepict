@@ -90,7 +90,7 @@ class RandomDepictor(Augmentations,
             )
             self.jvmPath = "Define/path/or/set/JAVA_HOME/variable/properly"
         if not isJVMStarted():
-            self.jar_path = self.HERE.joinpath("jar_files/cdk-2.9.jar")
+            self.jar_path = self.HERE.joinpath("jar_files/cdk-2.10.jar")
             startJVM(self.jvmPath,
                      "-ea",
                      "-Djava.class.path=" + str(self.jar_path),
