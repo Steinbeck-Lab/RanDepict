@@ -99,24 +99,21 @@ class RandomDepictor(
             )
             self.jvmPath = "Define/path/or/set/JAVA_HOME/variable/properly"
         if not isJVMStarted():
-            
+
             # Define CDK jar file details
             cdk_version = "2.10"
             cdk_url = f"https://github.com/cdk/cdk/releases/download/cdk-{cdk_version}/cdk-{cdk_version}.jar"
-            
+
             # Use pystow to manage jar file
             jar_dir = pystow.join("jar_files")
             self.jar_path = str(jar_dir.joinpath(f"cdk-{cdk_version}.jar"))
-            
+
             # Download jar if not present
             if not os.path.exists(self.jar_path):
                 pystow.ensure("jar_files", url=cdk_url)
-            
+
             startJVM(
-                self.jvmPath,
-                "-ea", 
-                "-Djava.class.path=" + self.jar_path,
-                "-Xmx4096M"
+                self.jvmPath, "-ea", "-Djava.class.path=" + self.jar_path, "-Xmx4096M"
             )
 
         random.seed(self.seed)
