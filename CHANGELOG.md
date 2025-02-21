@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.4.1](https://github.com/Steinbeck-Lab/RanDepict/compare/v1.4.0...v1.4.1) (2025-02-21)
+
+
+### Bug Fixes
+
+* automaticaly download CDK ([2a0c54c](https://github.com/Steinbeck-Lab/RanDepict/commit/2a0c54c1676fd8edbfcaafb2f049863a4c29d6ce))
+* automaticaly download CDK ([2a037b6](https://github.com/Steinbeck-Lab/RanDepict/commit/2a037b6aca5d62fe1a24321a349355585ab9d12b))
+* CDK download and initialization ([5061c8b](https://github.com/Steinbeck-Lab/RanDepict/commit/5061c8b5d30d58f27b00f39630c8d6a5d19f8a5e))
+* linting ([6339a4f](https://github.com/Steinbeck-Lab/RanDepict/commit/6339a4f7f0f763d24939b317d2152fd00f3ed485))
+* pikachu issue with matplotlib ([b834ff7](https://github.com/Steinbeck-Lab/RanDepict/commit/b834ff7c295e91668e77a36663ebb3ff4dd56f35))
+
 ## [1.4.0](https://github.com/Steinbeck-Lab/RanDepict/compare/v1.3.1...v1.4.0) (2024-10-28)
 
 
