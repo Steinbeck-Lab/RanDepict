@@ -311,24 +311,24 @@ class RandomDepictor(Augmentations,
                                for k in self._config.styles]
 
         # Remove PIKAChU if there is an isotope
-        if re.search("(\[\d\d\d?[A-Z])|(\[2H\])|(\[3H\])|(D)|(T)", smiles):
+        if re.search(r"(\[\d\d\d?[A-Z])|(\[2H\])|(\[3H\])|(D)|(T)", smiles):
             if self.pikachu_depict in depiction_functions:
                 depiction_functions.remove(self.pikachu_depict)
         if self.has_r_group(smiles):
             # PIKAChU only accepts \[[RXZ]\d*\]
-            squared_bracket_content = re.findall("\[.+?\]", smiles)
+            squared_bracket_content = re.findall(r"\[.+?\]", smiles)
             for r_group in squared_bracket_content:
-                if not re.search("\[[RXZ]\d*\]", r_group):
+                if not re.search(r"\[[RXZ]\d*\]", r_group):
                     if self.pikachu_depict in depiction_functions:
                         depiction_functions.remove(self.pikachu_depict)
             # "R", "X", "Z" are not depicted by RDKit
             # The same is valid for X,Y,Z and a number
             if self.rdkit_depict in depiction_functions:
-                if re.search("\[[RXZ]\]|\[[XYZ]\d+", smiles):
+                if re.search(r"\[[RXZ]\]|\[[XYZ]\d+", smiles):
                     depiction_functions.remove(self.rdkit_depict)
             # "X", "R0", [RXYZ]\d+[a-f] and indices above 32 are not depicted by Indigo
             if self.indigo_depict in depiction_functions:
-                if re.search("\[R0\]|\[X\]|[4-9][0-9]+|3[3-9]|[XYZR]\d+[a-f]", smiles):
+                if re.search(r"\[R0\]|\[X\]|[4-9][0-9]+|3[3-9]|[XYZR]\d+[a-f]", smiles):
                     depiction_functions.remove(self.indigo_depict)
         # Workaround because PIKAChU fails to depict large structures
         # TODO: Delete workaround when problem is fixed in PIKAChU
@@ -739,7 +739,7 @@ class RandomDepictor(Augmentations,
         Returns:
             bool
         """
-        if re.search("\[.*[RXYZ].*\]", smiles):
+        if re.search(r"\[.*[RXYZ].*\]", smiles):
             return True
 
     def _smiles_to_mol_block(
@@ -776,7 +776,7 @@ class RandomDepictor(Augmentations,
             molecule = self._cdk_rotate_coordinates(molecule)
             return self._cdk_iatomcontainer_to_mol_block(molecule)
         elif generate_2d == "rdkit":
-            if re.search("\[[RXZ]\]|\[[XYZ]\d+", smiles):
+            if re.search(r"\[[RXZ]\]|\[[XYZ]\d+", smiles):
                 return self._smiles_to_mol_block(smiles, generate_2d="cdk")
             mol_block = self._smiles_to_mol_block(smiles)
             molecule = Chem.MolFromMolBlock(mol_block, sanitize=False)
@@ -789,7 +789,7 @@ class RandomDepictor(Augmentations,
             else:
                 raise ValueError(f"RDKit could not read molecule: {smiles}")
         elif generate_2d == "indigo":
-            if re.search("\[R0\]|\[X\]|[4-9][0-9]+|3[3-9]|[XYZR]\d+[a-f]", smiles):
+            if re.search(r"\[R0\]|\[X\]|[4-9][0-9]+|3[3-9]|[XYZR]\d+[a-f]", smiles):
                 return self._smiles_to_mol_block(smiles, generate_2d="cdk")
             indigo = Indigo()
             mol_block = self._smiles_to_mol_block(smiles)
