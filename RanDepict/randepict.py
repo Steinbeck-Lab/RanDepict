@@ -108,10 +108,6 @@ class RandomDepictor(
                     url="https://github.com/cdk/cdk/releases/download/cdk-2.10/cdk-2.10.jar",
                 )
 
-        for key, url in paths.items():
-            if not os.path.exists(jar_paths[key]):
-                pystow.ensure("jar_files", url=url)
-
             startJVM(
                 self.jvmPath,
                 "-ea",
